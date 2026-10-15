@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReAct 电商助手 · AgentScope Java</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">A<span>↗</span></span><div><h1>ReAct 电商助手</h1><p>AgentScope Java · 商品选购</p></div></div>
+    <div class="connection"><span id="connection-dot" class="connection-dot"></span><div><span id="model-name">连接本地服务…</span><small id="model-provider">SDK 2.0.3</small></div></div>
+  </header>
+  <main class="workspace">
+    <section class="conversation" aria-label="商品选购对话">
+      <div class="section-heading"><h2>选购咨询</h2><button id="new-query" class="text-button" type="button">新查询 <span aria-hidden="true">↗</span></button></div>
+      <div class="scope-note"><span class="scope-dot" aria-hidden="true"></span>模拟商品 · 只读查询 · 不锁库、不下单</div>
+      <div id="thread" class="thread" aria-live="polite">
+        <div id="empty-state" class="empty-state"><span class="empty-arrow" aria-hidden="true">↗</span><h3>告诉我预算和键盘特点</h3><p>先筛选商品，再查询库存，<br>最后根据工具结果给出推荐。</p></div>
+      </div>
+      <div id="run-status" class="run-status" role="status"><span id="status-label">准备好开始查询</span><span id="model-count"></span></div>
+      <form id="query-form" class="composer">
+        <label class="sr-only" for="message">选购需求</label>
+        <textarea id="message" rows="2" maxlength="1500" placeholder="例如：200元以内，适合办公室的静音键盘，只推荐现货。" required></textarea>
+        <div class="composer-actions"><span>Enter 发送 · Shift + Enter 换行</span><button id="send" class="send-button" type="submit">发送 <span aria-hidden="true">↗</span></button></div>
+      </form>
+      <div class="examples"><span>试一试</span><button type="button" data-example="stock">200 元现货推荐</button><button type="button" data-example="empty">100 元无匹配</button></div>
+      <p id="usage-note" class="usage-note">每次发送独立查询，不承接上一轮对话。</p>
+    </section>
+    <aside class="inspector" aria-label="商品与执行过程">
+      <section class="tools-section" aria-label="执行过程">
+        <div class="section-heading"><h2>执行过程</h2><span id="tool-count" class="quiet">0 次工具调用</span></div>
+        <div class="trace-tabs" role="tablist" aria-label="执行过程视图">
+          <button id="view-chain" type="button" role="tab" aria-selected="true" aria-controls="chain-panel" data-trace-view="chain">工具链</button>
+          <button id="view-log" type="button" role="tab" aria-selected="false" aria-controls="log-panel" tabindex="-1" data-trace-view="log">事件日志</button>
+        </div>
+        <p id="tools-hint" class="quiet tools-hint">发送查询后，按发生顺序显示模型请求、工具调用和返回结果。</p>
+        <div id="chain-panel" class="trace-panel" role="tabpanel" aria-labelledby="view-chain" tabindex="0"><ol id="tools" class="tool-list"></ol></div>
+        <div id="log-panel" class="trace-panel log-panel" role="tabpanel" aria-labelledby="view-log" tabindex="0" hidden><pre id="event-log" class="event-log"></pre></div>
+        <p class="trace-note"><span id="event-count">0 条事件</span> · 北京时间 · 不含模型思维片段</p>
+      </section>
+      <div id="run-meta" class="run-meta" hidden><span>运行编号</span><code id="run-id"></code><span id="finish-reason"></span></div>
+      <details class="catalog-section"><summary>模拟商品库 <span id="catalog-count" class="quiet">加载中</span></summary><div id="catalog" class="catalog"></div></details>
+    </aside>
+  </main>
+</body>
+</html>

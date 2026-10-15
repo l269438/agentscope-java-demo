@@ -1,0 +1,48 @@
+{
+  "info": {
+    "_postman_id": "7e6ee9da-fc61-4d73-a2fb-98e9476f01a4",
+    "name": "AgentScope Java 01 - 本地只读工具（无模型调用）",
+    "description": "手工提交 SDK 工具参数，不调用模型；商品与库存均为模拟数据。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{"key": "baseUrl", "value": "http://127.0.0.1:18181", "type": "string"}],
+  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+    "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+    "pm.test('没有模型调用', function () { pm.expect(pm.response.json().modelInvoked === true).to.eql(false); });"
+  ]}}],
+  "item": [
+    {
+      "name": "01 服务状态",
+      "request": {"method": "GET", "url": "{{baseUrl}}/health"}
+    },
+    {
+      "name": "02 工具 Schema",
+      "request": {"method": "GET", "url": "{{baseUrl}}/api/react/tools/schema"}
+    },
+    {
+      "name": "03 筛选200元内静音键盘",
+      "request": {"method": "POST", "url": "{{baseUrl}}/api/react/tools/run", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"find_products\",\"arguments\":{\"maxPriceYuan\":200,\"feature\":\"静音\"}}", "options": {"raw": {"language": "json"}}}},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('候选为KB100/KB200', function () { pm.expect(JSON.parse(pm.response.json().resultText).map(p => p.sku)).to.eql(['KB100', 'KB200']); });"]}}]
+    },
+    {
+      "name": "04 查询KB100现货",
+      "request": {"method": "POST", "url": "{{baseUrl}}/api/react/tools/run", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"get_stock\",\"arguments\":{\"sku\":\"KB100\"}}", "options": {"raw": {"language": "json"}}}},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('KB100库存12件', function () { pm.expect(JSON.parse(pm.response.json().resultText)).to.eql({sku:'KB100', stock:12, inStock:true}); });"]}}]
+    },
+    {
+      "name": "05 查询KB200缺货",
+      "request": {"method": "POST", "url": "{{baseUrl}}/api/react/tools/run", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"get_stock\",\"arguments\":{\"sku\":\"KB200\"}}", "options": {"raw": {"language": "json"}}}},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('KB200库存为0', function () { pm.expect(JSON.parse(pm.response.json().resultText)).to.eql({sku:'KB200', stock:0, inStock:false}); });"]}}]
+    },
+    {
+      "name": "06 100元预算无匹配",
+      "request": {"method": "POST", "url": "{{baseUrl}}/api/react/tools/run", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"find_products\",\"arguments\":{\"maxPriceYuan\":100,\"feature\":\"静音\"}}", "options": {"raw": {"language": "json"}}}},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('返回空列表', function () { pm.expect(JSON.parse(pm.response.json().resultText)).to.eql([]); });"]}}]
+    },
+    {
+      "name": "07 不存在的商品",
+      "request": {"method": "POST", "url": "{{baseUrl}}/api/react/tools/run", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"get_stock\",\"arguments\":{\"sku\":\"MISSING\"}}", "options": {"raw": {"language": "json"}}}},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('保留SDK错误内容', function () { pm.expect(pm.response.json().resultText).to.include('商品不存在'); });"]}}]
+    }
+  ]
+}

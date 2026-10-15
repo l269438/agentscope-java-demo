@@ -1,0 +1,73 @@
+{
+  "info": {
+    "_postman_id": "c1a5e83d-5ee1-4a0d-879b-e09e7d63d257",
+    "name": "AgentScope Java 01 - ReAct电商助手",
+    "description": "先GET /health确认provider与model。Ollama使用本机模型；DashScope需本机配置密钥，可能计费。请求会调用当前服务配置的模型。HTTP成功后仍需核对工具轨迹、最终推荐和阶段性总结状态。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{"key": "baseUrl", "value": "http://127.0.0.1:18181", "type": "string"}],
+  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+    "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+    "if (pm.response.code === 200) {",
+    "  const data = pm.response.json();",
+    "  pm.test('模型入口返回非空回复', function () { pm.expect(data.mode).to.eql('model-run'); pm.expect(data.reply.text).to.be.a('string').and.not.empty; pm.expect(data.modelCalls).to.be.above(0); });",
+    "  pm.test('正常结束，未到迭代上限', function () { pm.expect(data.reply.stageSummary).to.eql(false); });",
+    "  pm.collectionVariables.set('lastRunId', data.runId);",
+    "}"
+  ]}}],
+  "item": [
+    {
+      "name": "R01 200元静音键盘现货推荐",
+      "request": {"method": "POST", "url": "{{baseUrl}}/api/react/run", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"message\":\"预算200元，想买适合办公室的静音键盘。只推荐有现货的商品，并说明价格、特点和库存。\"}", "options": {"raw": {"language": "json"}}}},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "if (pm.response.code === 200) {",
+        "  const data = pm.response.json();",
+        "  const events = data.events || [];",
+        "  const inputs = events.filter(e => e.type === 'java_tool_input');",
+        "  const outputs = events.filter(e => e.type === 'java_tool_output');",
+        "  const filtered = outputs.find(e => e.payload.name === 'find_products');",
+        "  const finalReply = events.find(e => e.type === 'final_reply');",
+        "  pm.test('按200元与静音筛选两个候选', function () {",
+        "    const query = inputs.find(e => e.payload.name === 'find_products');",
+        "    pm.expect(query).to.exist; pm.expect(query.payload.maxPriceYuan).to.eql(200); pm.expect(query.payload.feature).to.eql('静音');",
+        "    pm.expect(filtered).to.exist; pm.expect(filtered.payload.result.map(p => p.sku)).to.have.members(['KB100', 'KB200']);",
+        "  });",
+        "  pm.test('候选库存查询发生在筛选之后、最终回复之前', function () {",
+        "    pm.expect(filtered).to.exist; pm.expect(finalReply).to.exist;",
+        "    ['KB100', 'KB200'].forEach(sku => {",
+        "      const call = inputs.find(e => e.payload.name === 'get_stock' && e.payload.sku === sku);",
+        "      const result = outputs.find(e => e.payload.name === 'get_stock' && e.payload.result.sku === sku);",
+        "      pm.expect(call, sku + '调用').to.exist; pm.expect(result, sku + '返回').to.exist;",
+        "      pm.expect(call.sequence).to.be.above(filtered.sequence); pm.expect(result.sequence).to.be.above(call.sequence); pm.expect(finalReply.sequence).to.be.above(result.sequence);",
+        "    });",
+        "  });",
+        "  pm.test('两款库存来自工具返回12与0', function () {",
+        "    const stocks = outputs.filter(e => e.payload.name === 'get_stock').map(e => e.payload.result);",
+        "    pm.expect(stocks).to.deep.include({sku:'KB100', stock:12, inStock:true});",
+        "    pm.expect(stocks).to.deep.include({sku:'KB200', stock:0, inStock:false});",
+        "  });",
+        "  // 最终推荐的含义仍须人工核对，不能用HTTP200或以上轨迹断言代替。",
+        "}"
+      ]}}]
+    },
+    {
+      "name": "R02 100元静音键盘无匹配商品",
+      "request": {"method": "POST", "url": "{{baseUrl}}/api/react/run", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"message\":\"预算100元，想买静音键盘，只推荐有现货的商品。\"}", "options": {"raw": {"language": "json"}}}},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "if (pm.response.code === 200) {",
+        "  const events = pm.response.json().events || [];",
+        "  pm.test('按100元与静音筛选并返回空列表', function () {",
+        "    const input = events.find(e => e.type === 'java_tool_input' && e.payload.name === 'find_products');",
+        "    const output = events.find(e => e.type === 'java_tool_output' && e.payload.name === 'find_products');",
+        "    pm.expect(input).to.exist; pm.expect(input.payload.maxPriceYuan).to.eql(100); pm.expect(input.payload.feature).to.eql('静音');",
+        "    pm.expect(output).to.exist; pm.expect(output.payload.result).to.eql([]);",
+        "  });",
+        "  pm.test('无候选时没有查询虚构商品的库存', function () {",
+        "    pm.expect(events.filter(e => e.type === 'java_tool_input' && e.payload.name === 'get_stock')).to.have.lengthOf(0);",
+        "  });",
+        "  // 回复是否明确无匹配、是否编造商品，另行人工核对。",
+        "}"
+      ]}}]
+    }
+  ]
+}
