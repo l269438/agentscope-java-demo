@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-15T08:20:55.511Z",
+  "markdown": "README.md",
+  "entries": {
+    "assets/wechat-qr.png": {
+      "hash": "42805779f66fb96d4944efcab863cddbdb73f0c275d2bfffb07f7b27d53b9c44",
+      "objectKey": "articles/agentscope-java-demo/42805779f66fb96d-wechat-qr.png",
+      "source": "assets/wechat-qr.png",
+      "uploadedAt": "2026-10-15T08:20:55.509Z",
+      "url": "https://osswechatai.oss-cn-beijing.aliyuncs.com/articles/agentscope-java-demo/42805779f66fb96d-wechat-qr.png"
+    }
+  }
+}

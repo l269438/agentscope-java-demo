@@ -4,6 +4,8 @@
 
 JDK17+、Maven3.8+、AgentScope Java2.0.3。GitHub仓库为`l269438/agentscope-java-demo`，当前私有。
 
+公众号：**雷一言说** · [扫码关注，查看系列文章与后续更新](#关注作者)
+
 ## 按篇次查看
 
 | 篇次 | 目录 | 主要内容 |
@@ -71,3 +73,11 @@ DashScope默认使用`qwen-plus`，需要`DASHSCOPE_API_KEY`。云模型请求�
 `runs/`保存新执行的输入、上下文、事件、日志和结果；历史运行原件保留在原机器，未随仓库上传。`.env`、`runs/`、所有模块的`target/`、IDE本机配置和私钥文件均由Git忽略。
 
 旧布局记录保留在[历史说明](docs/历史使用说明-单工程.md)，其中路径与命令用于回查。当前运行以本README和编号章节为准。
+
+## 关注作者
+
+我是一言，持续分享 AgentScope、Spring AI 与 Java AI 应用实战。
+
+扫码关注公众号「雷一言说」，一起用 Java 把 AI 功能接进业务。
+
+![微信公众号「雷一言说」二维码](https://osswechatai.oss-cn-beijing.aliyuncs.com/articles/agentscope-java-demo/42805779f66fb96d-wechat-qr.png)
