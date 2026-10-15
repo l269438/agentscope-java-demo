@@ -2,14 +2,29 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>dev.yiyan</groupId>
-    <artifactId>agentscope-java-demo</artifactId>
-    <version>1.0.0</version>
+    <groupId>dev.yiyan</groupId><artifactId>agentscope-java-demo</artifactId><version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>AgentScope Java 中文分篇示例</name>
+    <modules>
+        <module>公共模块</module>
+        <module>01-ReAct与工具调用</module>
+        <module>02-工具权限与人工确认</module>
+        <module>03-工作区与规则加载</module>
+        <module>04-会话状态与断点恢复</module>
+        <module>05-文件记忆与跨会话复用</module>
+        <module>06-上下文压缩与长结果处理</module>
+        <module>07-Skills与工具组</module>
+        <module>08-子Agent与计划确认</module>
+        <module>09-事件流与中间件</module>
+        <module>10-Docker沙箱与工作区恢复</module>
+        <module>系列运行器</module>
+    </modules>
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <agentscope.version>2.0.3</agentscope.version>
-        <exec.mainClass>dev.yiyan.agentscope.DemoApplication</exec.mainClass>
+        <exec.mainClass>dev.yiyan.agentscope.LocalSmoke</exec.mainClass>
+        <demo.root>${maven.multiModuleProjectDirectory}</demo.root>
     </properties>
     <dependencies>
         <dependency><groupId>io.agentscope</groupId><artifactId>agentscope-core</artifactId><version>${agentscope.version}</version></dependency>
@@ -20,11 +35,16 @@
     </dependencies>
     <build><plugins>
         <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.13.0</version></plugin>
-        <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>3.5.2</version></plugin>
-        <plugin><groupId>org.codehaus.mojo</groupId><artifactId>exec-maven-plugin</artifactId><version>3.5.0</version><configuration>
-            <mainClass>${exec.mainClass}</mainClass>
-            <executable>${java.home}/bin/java</executable>
-            <arguments><argument>-classpath</argument><classpath/><argument>${exec.mainClass}</argument></arguments>
-        </configuration></plugin>
+        <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>3.5.2</version>
+            <configuration><workingDirectory>${demo.root}</workingDirectory></configuration>
+        </plugin>
+        <plugin><groupId>org.codehaus.mojo</groupId><artifactId>exec-maven-plugin</artifactId><version>3.5.0</version>
+            <configuration>
+                <mainClass>${exec.mainClass}</mainClass>
+                <workingDirectory>${demo.root}</workingDirectory>
+                <executable>${java.home}/bin/java</executable>
+                <arguments><argument>-classpath</argument><classpath/><argument>${exec.mainClass}</argument></arguments>
+            </configuration>
+        </plugin>
     </plugins></build>
 </project>
