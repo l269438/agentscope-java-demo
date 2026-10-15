@@ -80,4 +80,4 @@ DashScope默认使用`qwen-plus`，需要`DASHSCOPE_API_KEY`。云模型请求�
 
 扫码关注公众号「雷一言说」，一起用 Java 把 AI 功能接进业务。
 
-![微信公众号「雷一言说」二维码](https://osswechatai.oss-cn-beijing.aliyuncs.com/articles/agentscope-java-demo/42805779f66fb96d-wechat-qr.png)
+![微信公众号「雷一言说」二维码](assets/wechat-qr.png)
